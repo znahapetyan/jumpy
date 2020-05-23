@@ -379,7 +379,7 @@ class playGame extends Phaser.Scene {
                 this.firstCollide = false;
             } else {
                 this.setScore(this.score + 1);
-                // this.updateHoldColor();
+                this.updateHoldColor();
             }
         }
     };
