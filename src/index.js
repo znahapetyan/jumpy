@@ -71,6 +71,20 @@ class playGame extends Phaser.Scene {
         this.load.audio('backgroundMusic', [backgroundMusic]);
 
         this.textures.addBase64('scoreFont', scoreFont);
+
+        const loadingBar = this.add.graphics({
+            fillStyle: {
+                color: 0xffffff,
+            },
+        });
+
+        this.load
+            .on('progress', (percent) => {
+                loadingBar.fillRect(0, this.config.height / 2, this.config.width * percent, 50);
+            })
+            .on('complete', () => {
+                loadingBar.setVisible(false);
+            });
     }
 
     create() {
@@ -94,19 +108,11 @@ class playGame extends Phaser.Scene {
             volume: 0.5,
         });
 
-        this.backgroundMusic = this.sound.add('backgroundMusic', {
+        this.sound.pauseOnBlur = false;
+        this.sound.play('backgroundMusic', {
             volume: 0.3,
+            loop: true,
         });
-
-        this.backgroundMusic.on(
-            'complete',
-            () => {
-                this.backgroundMusic.play();
-            },
-            this,
-        );
-
-        this.backgroundMusic.play();
     }
 
     update() {
@@ -182,7 +188,7 @@ class playGame extends Phaser.Scene {
     };
 
     setScoreText = () => {
-        var config = {
+        const config = {
             image: 'scoreFont',
             width: 31,
             height: 25,
@@ -237,7 +243,6 @@ class playGame extends Phaser.Scene {
         //     }),
         // );
         // console.log('matter.add.circle');
-        console.log(this.holds);
         // this.cameras.main.ignore([...Object.values(this.holds).flat(), this.player.body]);
     }
 
