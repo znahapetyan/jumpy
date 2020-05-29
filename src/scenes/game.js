@@ -27,7 +27,10 @@ export default class Game extends Phaser.Scene {
         this.config = {
             playWidth: 280,
             rowDistance: 250,
-            bodyLength: 100,
+            body: {
+                height: 100,
+                width: 15,
+            },
             playerPos: {
                 X: 0,
                 Y: 0,
@@ -68,8 +71,12 @@ export default class Game extends Phaser.Scene {
         });
     }
 
-    update(isis) {
-        if (this.isActive && (this.cursors.up.isDown || this.input.activePointer.isDown) && this.isHolding) {
+    update() {
+        if (
+            this.isActive &&
+            (this.cursors.up.isDown || this.input.activePointer.isDown) &&
+            this.isHolding
+        ) {
             this.matter.world.removeConstraint(this.joint);
             this.isHolding = false;
 
@@ -81,6 +88,11 @@ export default class Game extends Phaser.Scene {
         }
 
         if (this.actionCamera.worldView.bottom + 2 < this.player.body.body.position.y) {
+            const { score } = this;
+
+            this.setActive(false);
+            this.scene.run('GameOver', { score });
+
             this.resetGame();
         }
 
@@ -107,7 +119,10 @@ export default class Game extends Phaser.Scene {
 
         this.isHolding = false;
 
-        this.actionCamera.pan(0, 0, 0, Phaser.Math.Easing.Cubic.InOut, true);
+        this.actionCamera.setScroll(
+            -this.game.renderer.width / 2,
+            -0.7 * this.game.renderer.height,
+        );
 
         this.maxScore = Math.max(this.score, this.maxScore);
 
@@ -157,7 +172,7 @@ export default class Game extends Phaser.Scene {
         const { width, height } = this.game.renderer;
 
         this.actionCamera = this.cameras.add(0, 0, width, height);
-        this.actionCamera.pan(0, -0.3 * height, 0);
+        this.actionCamera.setScroll(0, -0.2 * height);
         this.actionCamera.ignore([this.backgroundImage, this.currentScoreText, this.maxScoreText]);
 
         this.actionCamera.zoomTo(this.config.zoomNormal, 300, Phaser.Math.Easing.Cubic.InOut, true);
@@ -253,7 +268,7 @@ export default class Game extends Phaser.Scene {
         );
 
         const handSensorX = this.config.playerPos.X;
-        const handSensorY = this.config.playerPos.Y - this.config.bodyLength / 2;
+        const handSensorY = this.config.playerPos.Y - this.config.body.height / 2;
 
         const handSensor = this.matter.add.circle(
             handSensorX,
@@ -267,7 +282,7 @@ export default class Game extends Phaser.Scene {
         );
 
         this.matter.add.constraint(body, handSensor, 0, 1, {
-            pointA: { x: 0, y: -this.config.bodyLength / 2 },
+            pointA: { x: 0, y: -this.config.body.height / 2 },
         });
 
         return {
@@ -277,7 +292,7 @@ export default class Game extends Phaser.Scene {
     };
 
     updateHoldColor = () => {
-        const color = this.hsv[getRandomInt(0, 360)].color;
+        const color = this.hsv[getRandomInt(0, 359)].color;
 
         Object.keys(this.holds).forEach((k) => {
             this.holds[k].forEach((h) => {
@@ -290,8 +305,8 @@ export default class Game extends Phaser.Scene {
         if (!this.isHolding && !this.cursors.up.isDown && !this.input.activePointer.isDown) {
             const angle = Phaser.Math.DegToRad(this.player.body.angle);
 
-            const handX = (this.config.bodyLength / 2) * Math.sin(angle);
-            const handY = -(this.config.bodyLength / 2) * Math.cos(angle);
+            const handX = (this.config.body.height / 2) * Math.sin(angle);
+            const handY = -(this.config.body.height / 2) * Math.cos(angle);
 
             this.joint = this.matter.add.constraint(
                 this.player.body,
@@ -309,7 +324,7 @@ export default class Game extends Phaser.Scene {
             this.actionCamera.pan(
                 0,
                 y - 0.2 * this.game.renderer.height,
-                300,
+                this.firstCollide ? 0 : 300,
                 Phaser.Math.Easing.Cubic.InOut,
                 true,
             );
@@ -320,7 +335,9 @@ export default class Game extends Phaser.Scene {
                 this.firstCollide = false;
             } else {
                 this.catchSound.play();
+
                 this.setScore(this.score + 1);
+
                 this.updateHoldColor();
             }
         }

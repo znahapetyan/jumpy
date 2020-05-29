@@ -45,23 +45,19 @@ export default class Loading extends Phaser.Scene {
             },
         });
 
-        this.load
-            .on('progress', (percent) => {
-                loadingBar.fillRect(
-                    0,
-                    this.game.renderer.height / 2,
-                    this.game.renderer.width * percent,
-                    50,
-                );
-            })
+        this.load.on('progress', (percent) => {
+            loadingBar.fillRect(
+                0,
+                this.game.renderer.height / 2,
+                this.game.renderer.width * percent,
+                50,
+            );
+        });
     }
 
     create() {
-        console.log(this.scene);
-        // this.scene.launch('Home');
         this.scene.start('Home');
         this.scene.start('Game');
-        // this.scene.bringToTop('Home');
         this.scene.remove();
     }
 }

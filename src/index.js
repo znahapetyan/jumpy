@@ -3,6 +3,7 @@ import Phaser from 'phaser';
 import LoadingScene from 'scenes/loading';
 import GameScene from 'scenes/game';
 import HomeScene from 'scenes/home';
+import GameOverScene from 'scenes/gameOver';
 
 import './index.scss';
 
@@ -24,7 +25,7 @@ const config = {
     audio: {
         context: new window.AudioContext(),
     },
-    scene: [LoadingScene, GameScene, HomeScene],
+    scene: [LoadingScene, GameScene, HomeScene, GameOverScene],
 };
 
 new Phaser.Game(config);
