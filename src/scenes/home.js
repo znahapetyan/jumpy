@@ -17,13 +17,8 @@ export default class Home extends Phaser.Scene {
             .setOrigin(0, 0)
             .setAlpha(0.5);
 
-        this.add
-            .bitmapText(
-                this.game.renderer.width / 2 - 62,
-                this.game.renderer.height / 2,
-                'scoreFont',
-                'PLAY',
-            )
+        const playText = this.add
+            .bitmapText(0, 0, 'scoreFont', 'PLAY')
             .setInteractive()
             .on('pointerup', () => {
                 catchSound.play();
@@ -31,5 +26,10 @@ export default class Home extends Phaser.Scene {
                 this.scene.get('Game').setActive(true);
                 this.scene.setVisible(false);
             });
+        const playTextBounds = playText.getTextBounds(true);
+        playText.setPosition(
+            this.game.renderer.width / 2 - playTextBounds.global.width / 2,
+            this.game.renderer.height / 2 + 20,
+        );
     }
 }

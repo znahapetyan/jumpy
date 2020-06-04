@@ -3,7 +3,8 @@ import Phaser from 'phaser';
 import player from 'assets/images/player.png';
 import backgroundImage from 'assets/images/background.jpg';
 
-import scoreFont from 'assets/fonts/retro/knight3.png';
+import scoreFont from 'assets/fonts/bitmap/hyperdrive.png';
+import scoreFontxml from 'assets/fonts/bitmap/hyperdrive.xml';
 
 import jumpSound from 'assets/sound/Oawaaa_3.mp3';
 import catchSound from 'assets/sound/Vibrant_Game__Bling_1.mp3';
@@ -26,18 +27,7 @@ export default class Loading extends Phaser.Scene {
         this.load.audio('catchSound', [catchSound]);
         this.load.audio('backgroundMusic', [backgroundMusic]);
 
-        this.textures.addBase64('scoreFont', scoreFont);
-        this.cache.bitmapFont.add(
-            'scoreFont',
-            Phaser.GameObjects.RetroFont.Parse(this, {
-                image: 'scoreFont',
-                width: 31,
-                height: 25,
-                chars: Phaser.GameObjects.RetroFont.TEXT_SET6,
-                charsPerRow: 10,
-                spacing: { x: 1, y: 1 },
-            }),
-        );
+        this.load.bitmapFont('scoreFont', scoreFont, scoreFontxml);
 
         const loadingBar = this.add.graphics({
             fillStyle: {

@@ -7,7 +7,7 @@ export default class GameOver extends Phaser.Scene {
         });
     }
 
-    create({ score }) {
+    create({ score, bestScore }) {
         const catchSound = this.sound.add('catchSound', {
             volume: 0.5,
         });
@@ -17,20 +17,22 @@ export default class GameOver extends Phaser.Scene {
             .setOrigin(0, 0)
             .setAlpha(0.5);
 
-        this.add.bitmapText(
-            this.game.renderer.width / 2 - 162,
-            this.game.renderer.height / 2 - 50,
-            'scoreFont',
-            'SCORE: ' + score,
+        const scoreText = this.add.bitmapText(0, 0, 'scoreFont', 'SCORE: ' + score, 50);
+        const scoreTextBounds = scoreText.getTextBounds(true);
+        scoreText.setPosition(
+            this.game.renderer.width / 2 - scoreTextBounds.global.width / 2,
+            this.game.renderer.height / 2 - 180,
         );
 
-        this.add
-            .bitmapText(
-                this.game.renderer.width / 2 - 162,
-                this.game.renderer.height / 2,
-                'scoreFont',
-                'PLAY AGAIN',
-            )
+        const bestText = this.add.bitmapText(0, 0, 'scoreFont', 'BEST SCORE: ' + bestScore, 50);
+        const bestTextBounds = bestText.getTextBounds(true);
+        bestText.setPosition(
+            this.game.renderer.width / 2 - bestTextBounds.global.width / 2,
+            this.game.renderer.height / 2 - 120,
+        );
+
+        const playText = this.add
+            .bitmapText(0, 0, 'scoreFont', 'PLAY')
             .setInteractive()
             .on('pointerup', () => {
                 catchSound.play();
@@ -39,5 +41,10 @@ export default class GameOver extends Phaser.Scene {
                 gameScene.setActive(true);
                 this.scene.setVisible(false);
             });
+        const playTextBounds = playText.getTextBounds(true);
+        playText.setPosition(
+            this.game.renderer.width / 2 - playTextBounds.global.width / 2,
+            this.game.renderer.height / 2 + 20,
+        );
     }
 }

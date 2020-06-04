@@ -17,7 +17,7 @@ export default class Game extends Phaser.Scene {
         this.isHolding = false;
 
         this.score = 0;
-        this.maxScore = 0;
+        this.bestScore = localStorage.getItem('bestScore') || 0;
 
         this.firstCollide = true;
 
@@ -88,12 +88,7 @@ export default class Game extends Phaser.Scene {
         }
 
         if (this.actionCamera.worldView.bottom + 2 < this.player.body.body.position.y) {
-            const { score } = this;
-
-            this.setActive(false);
-            this.scene.run('GameOver', { score });
-
-            this.resetGame();
+            this.handleGameOver();
         }
 
         if (!this.isInViewPort(this.actionCamera, this.player.body.body)) {
@@ -107,6 +102,19 @@ export default class Game extends Phaser.Scene {
     setActive(isActive) {
         this.isActive = isActive;
     }
+
+    handleGameOver = () => {
+        this.bestScore = Math.max(this.score, this.bestScore);
+        localStorage.setItem('bestScore', this.bestScore);
+
+        this.setActive(false);
+        this.scene.run('GameOver', {
+            score: this.score,
+            bestScore: this.bestScore,
+        });
+
+        this.resetGame();
+    };
 
     resetGame = () => {
         this.setHolds();
@@ -123,8 +131,6 @@ export default class Game extends Phaser.Scene {
             -this.game.renderer.width / 2,
             -0.7 * this.game.renderer.height,
         );
-
-        this.maxScore = Math.max(this.score, this.maxScore);
 
         this.setScore(0);
 
@@ -152,20 +158,20 @@ export default class Game extends Phaser.Scene {
     };
 
     setScoreText = () => {
-        this.currentScoreText = this.add.bitmapText(20, 20, 'scoreFont', '');
-        this.maxScoreText = this.add.bitmapText(20, 50, 'scoreFont', '');
+        this.currentScoreText = this.add.bitmapText(20, 20, 'scoreFont', '', 40);
+        this.bestScoreText = this.add.bitmapText(20, 50, 'scoreFont', '', 40);
 
         this.setScore(0);
 
         this.currentScoreText.setScale(0.8);
-        this.maxScoreText.setScale(0.8);
+        this.bestScoreText.setScale(0.8);
     };
 
     setScore = (score) => {
         this.score = score;
 
-        this.currentScoreText.text = 'SCORE:' + this.score;
-        this.maxScoreText.text = 'BEST SCORE:' + this.maxScore;
+        this.currentScoreText.text = 'SCORE: ' + this.score;
+        this.bestScoreText.text = 'BEST SCORE: ' + this.bestScore;
     };
 
     setCameras() {
@@ -173,7 +179,7 @@ export default class Game extends Phaser.Scene {
 
         this.actionCamera = this.cameras.add(0, 0, width, height);
         this.actionCamera.setScroll(0, -0.2 * height);
-        this.actionCamera.ignore([this.backgroundImage, this.currentScoreText, this.maxScoreText]);
+        this.actionCamera.ignore([this.backgroundImage, this.currentScoreText, this.bestScoreText]);
 
         this.actionCamera.zoomTo(this.config.zoomNormal, 300, Phaser.Math.Easing.Cubic.InOut, true);
     }
