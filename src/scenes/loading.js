@@ -3,8 +3,8 @@ import Phaser from 'phaser';
 import player from 'assets/images/player.png';
 import backgroundImage from 'assets/images/background.jpg';
 
-import scoreFont from 'assets/fonts/bitmap/hyperdrive.png';
-import scoreFontxml from 'assets/fonts/bitmap/hyperdrive.xml';
+import mainFont from 'assets/fonts/bitmap/hyperdrive.png';
+import mainFontxml from 'assets/fonts/bitmap/hyperdrive.xml';
 
 import jumpSound from 'assets/sound/Oawaaa_3.mp3';
 import catchSound from 'assets/sound/Vibrant_Game__Bling_1.mp3';
@@ -27,7 +27,7 @@ export default class Loading extends Phaser.Scene {
         this.load.audio('catchSound', [catchSound]);
         this.load.audio('backgroundMusic', [backgroundMusic]);
 
-        this.load.bitmapFont('scoreFont', scoreFont, scoreFontxml);
+        this.load.bitmapFont('mainFont', mainFont, mainFontxml);
 
         const loadingBar = this.add.graphics({
             fillStyle: {

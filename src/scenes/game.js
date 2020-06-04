@@ -17,12 +17,11 @@ export default class Game extends Phaser.Scene {
         this.isHolding = false;
 
         this.score = 0;
-        this.bestScore = localStorage.getItem('bestScore') || 0;
+        this.bestScore = parseInt(localStorage.getItem('bestScore'), 0) || 0;
 
         this.firstCollide = true;
 
         this.hsv = Phaser.Display.Color.HSVColorWheel();
-        this.holdColorIndex = 0;
 
         this.config = {
             playWidth: 280,
@@ -48,12 +47,27 @@ export default class Game extends Phaser.Scene {
 
         this.setScoreText();
 
-        this.cursors = this.input.keyboard.createCursorKeys();
+        this.spacebar = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
 
         this.player = this.createPlayer();
-        this.player.handSensor.onCollideCallback = this.onHoldCollide;
 
         this.setHolds();
+
+        this.tweens.addCounter({
+            from: 0,
+            to: 359,
+            duration: 2000,
+            repeat: -1,
+            onUpdate: (tween) => {
+                const color = this.hsv[Math.floor(tween.getValue())].color;
+
+                Object.keys(this.holds).forEach((k) => {
+                    this.holds[k].forEach((h) => {
+                        h.strokeColor = color;
+                    });
+                });
+            },
+        });
 
         this.setCameras();
 
@@ -74,7 +88,7 @@ export default class Game extends Phaser.Scene {
     update() {
         if (
             this.isActive &&
-            (this.cursors.up.isDown || this.input.activePointer.isDown) &&
+            (this.spacebar.isDown || this.input.activePointer.isDown) &&
             this.isHolding
         ) {
             this.matter.world.removeConstraint(this.joint);
@@ -158,8 +172,8 @@ export default class Game extends Phaser.Scene {
     };
 
     setScoreText = () => {
-        this.currentScoreText = this.add.bitmapText(20, 20, 'scoreFont', '', 40);
-        this.bestScoreText = this.add.bitmapText(20, 50, 'scoreFont', '', 40);
+        this.currentScoreText = this.add.bitmapText(20, 20, 'mainFont', '', 40);
+        this.bestScoreText = this.add.bitmapText(20, 50, 'mainFont', '', 40);
 
         this.setScore(0);
 
@@ -205,7 +219,10 @@ export default class Game extends Phaser.Scene {
             rowLevel -= this.config.rowDistance;
         }
 
-        this.cameras.main.ignore([...Object.values(this.holds).flat(), this.player.body]);
+        this.cameras.main.ignore([
+            ...Object.values(this.holds).flat(),
+            this.player.body,
+        ]);
     };
 
     addHolds = (camera) => {
@@ -233,7 +250,10 @@ export default class Game extends Phaser.Scene {
             rowLevel -= this.config.rowDistance;
         }
 
-        this.cameras.main.ignore([...Object.values(this.holds).flat(), this.player.body]);
+        this.cameras.main.ignore([
+            ...Object.values(this.holds).flat(),
+            this.player.body,
+        ]);
     };
 
     createHoldRow = (y) => {
@@ -251,10 +271,14 @@ export default class Game extends Phaser.Scene {
     };
 
     createHold = (x, y) => {
-        return this.matter.add.gameObject(this.add.circle(x, y, this.config.holdRadius, 0xe6019b), {
-            isStatic: true,
-            isSensor: true,
-        });
+        return this.matter.add.gameObject(
+            this.add.circle(x, y, this.config.holdRadius, 0xffffff).setStrokeStyle(4, 0xffffff),
+            {
+                isStatic: true,
+                isSensor: true,
+                level: Math.abs(y / this.config.rowDistance),
+            },
+        );
     };
 
     createPlayer = () => {
@@ -273,12 +297,9 @@ export default class Game extends Phaser.Scene {
             },
         );
 
-        const handSensorX = this.config.playerPos.X;
-        const handSensorY = this.config.playerPos.Y - this.config.body.height / 2;
-
         const handSensor = this.matter.add.circle(
-            handSensorX,
-            handSensorY,
+            this.config.playerPos.X,
+            this.config.playerPos.Y - this.config.body.height / 2,
             this.config.playerHandRadius,
             {
                 collisionFilter: { group: playerGroup },
@@ -287,13 +308,14 @@ export default class Game extends Phaser.Scene {
             },
         );
 
+        handSensor.onCollideCallback = this.onHoldCollide;
+
         this.matter.add.constraint(body, handSensor, 0, 1, {
             pointA: { x: 0, y: -this.config.body.height / 2 },
         });
 
         return {
             body,
-            handSensor,
         };
     };
 
@@ -308,7 +330,7 @@ export default class Game extends Phaser.Scene {
     };
 
     onHoldCollide = ({ bodyB }) => {
-        if (!this.isHolding && !this.cursors.up.isDown && !this.input.activePointer.isDown) {
+        if (!this.isHolding && !this.spacebar.isDown && !this.input.activePointer.isDown) {
             const angle = Phaser.Math.DegToRad(this.player.body.angle);
 
             const handX = (this.config.body.height / 2) * Math.sin(angle);
@@ -342,9 +364,9 @@ export default class Game extends Phaser.Scene {
             } else {
                 this.catchSound.play();
 
-                this.setScore(this.score + 1);
+                this.setScore(Math.max(bodyB.level, this.score));
 
-                this.updateHoldColor();
+                // this.updateHoldColor();
             }
         }
     };

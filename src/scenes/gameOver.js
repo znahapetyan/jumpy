@@ -17,14 +17,14 @@ export default class GameOver extends Phaser.Scene {
             .setOrigin(0, 0)
             .setAlpha(0.5);
 
-        const scoreText = this.add.bitmapText(0, 0, 'scoreFont', 'SCORE: ' + score, 50);
+        const scoreText = this.add.bitmapText(0, 0, 'mainFont', 'SCORE: ' + score, 50);
         const scoreTextBounds = scoreText.getTextBounds(true);
         scoreText.setPosition(
             this.game.renderer.width / 2 - scoreTextBounds.global.width / 2,
             this.game.renderer.height / 2 - 180,
         );
 
-        const bestText = this.add.bitmapText(0, 0, 'scoreFont', 'BEST SCORE: ' + bestScore, 50);
+        const bestText = this.add.bitmapText(0, 0, 'mainFont', 'BEST SCORE: ' + bestScore, 50);
         const bestTextBounds = bestText.getTextBounds(true);
         bestText.setPosition(
             this.game.renderer.width / 2 - bestTextBounds.global.width / 2,
@@ -32,14 +32,13 @@ export default class GameOver extends Phaser.Scene {
         );
 
         const playText = this.add
-            .bitmapText(0, 0, 'scoreFont', 'PLAY')
-            .setInteractive()
+            .bitmapText(0, 0, 'mainFont', 'PLAY')
+            .setInteractive({ cursor: 'pointer' })
             .on('pointerup', () => {
                 catchSound.play();
 
-                const gameScene = this.scene.get('Game');
-                gameScene.setActive(true);
-                this.scene.setVisible(false);
+                this.scene.get('Game').setActive(true);
+                this.scene.stop();
             });
         const playTextBounds = playText.getTextBounds(true);
         playText.setPosition(

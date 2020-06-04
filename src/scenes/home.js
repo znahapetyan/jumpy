@@ -18,13 +18,13 @@ export default class Home extends Phaser.Scene {
             .setAlpha(0.5);
 
         const playText = this.add
-            .bitmapText(0, 0, 'scoreFont', 'PLAY')
-            .setInteractive()
+            .bitmapText(0, 0, 'mainFont', 'PLAY')
+            .setInteractive({ cursor: 'pointer' })
             .on('pointerup', () => {
                 catchSound.play();
 
                 this.scene.get('Game').setActive(true);
-                this.scene.setVisible(false);
+                this.scene.stop();
             });
         const playTextBounds = playText.getTextBounds(true);
         playText.setPosition(
