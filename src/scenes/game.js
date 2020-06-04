@@ -94,11 +94,20 @@ export default class Game extends Phaser.Scene {
             this.matter.world.removeConstraint(this.joint);
             this.isHolding = false;
 
+            const force = Math.max(0.15 - this.score * (0.15 / 30), 0);
+
+            const angle = Phaser.Math.DegToRad(this.player.body.angle);
+            this.player.body.applyForce({
+                x: -force * Math.cos(angle),
+                y: -force * Math.sin(angle),
+            });
+
             this.jumpSound.play();
         }
 
         if (this.isHolding) {
-            this.player.body.setAngularVelocity(0.2);
+            const velocity = Math.min(0.13 + this.score * (0.07 / 30), 0.2);
+            this.player.body.setAngularVelocity(velocity);
         }
 
         if (this.actionCamera.worldView.bottom + 2 < this.player.body.body.position.y) {
@@ -219,10 +228,7 @@ export default class Game extends Phaser.Scene {
             rowLevel -= this.config.rowDistance;
         }
 
-        this.cameras.main.ignore([
-            ...Object.values(this.holds).flat(),
-            this.player.body,
-        ]);
+        this.cameras.main.ignore([...Object.values(this.holds).flat(), this.player.body]);
     };
 
     addHolds = (camera) => {
@@ -250,10 +256,7 @@ export default class Game extends Phaser.Scene {
             rowLevel -= this.config.rowDistance;
         }
 
-        this.cameras.main.ignore([
-            ...Object.values(this.holds).flat(),
-            this.player.body,
-        ]);
+        this.cameras.main.ignore([...Object.values(this.holds).flat(), this.player.body]);
     };
 
     createHoldRow = (y) => {
